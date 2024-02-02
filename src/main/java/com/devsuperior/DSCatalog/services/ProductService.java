@@ -23,6 +23,9 @@ public class ProductService {
     @Autowired
     private ProductRepository repository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     @Transactional(readOnly = true)
     public Page<ProductDTO> findAll(Pageable pageable){
         return repository.findAll(pageable).map(x -> new ProductDTO(x));
@@ -31,17 +34,13 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
         Product product = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Entity Not Found"));
-        return new ProductDTO(product);
+        return new ProductDTO(product, product.getCategories());
     }
 
     @Transactional
     public ProductDTO insert(ProductDTO dto) {
         Product product = new Product();
-        product.setName(dto.getName());
-        product.setDescription(dto.getDescription());
-        product.setPrice(dto.getPrice());
-        product.setImgUrl(dto.getImgUrl());
-        product.setDate(dto.getDate());
+        copyDtoToEntity(dto, product);
         product = repository.save(product);
         return new ProductDTO(product);
     }
@@ -50,11 +49,7 @@ public class ProductService {
     public ProductDTO update(Long id, ProductDTO dto) {
         try {
             Product product = repository.getReferenceById(id);
-            product.setName(dto.getName());
-            product.setDescription(dto.getDescription());
-            product.setPrice(dto.getPrice());
-            product.setImgUrl(dto.getImgUrl());
-            product.setDate(dto.getDate());
+            copyDtoToEntity(dto, product);
             product = repository.save(product);
             return new ProductDTO(product);
         }catch (EntityNotFoundException e){
@@ -73,5 +68,18 @@ public class ProductService {
             throw new DatabaseException("Falha de integridade referencial");
         }
 
+    }
+
+    private void copyDtoToEntity(ProductDTO dto, Product product) {
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setImgUrl(dto.getImgUrl());
+        product.setDate(dto.getDate());
+        product.getCategories().clear();
+        for (CategoryDTO cat : dto.getCategories()){
+            Category category = categoryRepository.getReferenceById(cat.getId());
+            product.getCategories().add(new Category(category.getId(), category.getName()));
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.devsuperior.DSCatalog.entities.Product;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ProductDTO {
 
@@ -37,11 +38,18 @@ public class ProductDTO {
         price = entity.getPrice();
         imgUrl = entity.getImgUrl();
         date = entity.getDate();
-        /*
-                for (Category category : entity.getCategories()){
+    }
+
+    public ProductDTO(Product entity, Set<Category> categories) {
+        id = entity.getId();
+        name = entity.getName();
+        description = entity.getDescription();
+        price = entity.getPrice();
+        imgUrl = entity.getImgUrl();
+        date = entity.getDate();
+        for (Category category : categories){
             this.categories.add(new CategoryDTO(category));
         }
-         */
     }
 
     public Long getId() {
