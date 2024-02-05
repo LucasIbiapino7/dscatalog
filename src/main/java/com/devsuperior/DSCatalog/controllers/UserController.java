@@ -3,6 +3,7 @@ package com.devsuperior.DSCatalog.controllers;
 import com.devsuperior.DSCatalog.dto.ProductDTO;
 import com.devsuperior.DSCatalog.dto.UserDTO;
 import com.devsuperior.DSCatalog.dto.UserInsertDTO;
+import com.devsuperior.DSCatalog.dto.UserUpdateDTO;
 import com.devsuperior.DSCatalog.services.ProductService;
 import com.devsuperior.DSCatalog.services.UserService;
 import jakarta.persistence.Entity;
@@ -44,9 +45,9 @@ public class UserController {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<UserDTO> update(@Valid @PathVariable Long id, @RequestBody UserDTO dto){
-        dto = service.update(id, dto);
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto){
+        UserDTO newDto = service.update(id, dto);
+        return ResponseEntity.ok(newDto);
     }
 
     @DeleteMapping(value = "/{id}")
