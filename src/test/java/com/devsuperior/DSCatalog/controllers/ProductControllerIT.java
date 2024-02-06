@@ -2,6 +2,7 @@ package com.devsuperior.DSCatalog.controllers;
 
 import com.devsuperior.DSCatalog.dto.ProductDTO;
 import com.devsuperior.DSCatalog.tests.Factory;
+import com.devsuperior.DSCatalog.tests.TokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,15 +32,25 @@ class ProductControllerIT {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private TokenUtil tokenUtil;
+
     private long existingId;
     private long notExistingId;
     private long countTotalProducts;
 
+    private String username, password, bearerToken;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception{
         existingId = 1L;
         notExistingId = 1000L;
         countTotalProducts = 25L;
+
+        username = "maria@gmail.com";
+        password = "123456";
+
+        bearerToken = tokenUtil.obtainAccessToken(mockMvc, username, password);
     }
 
     @Test
@@ -68,6 +79,7 @@ class ProductControllerIT {
 
         //EScrevemos a chamada HTTP
         ResultActions result = mockMvc.perform(put("/products/{id}", existingId)
+                .header("Authorization", "Bearer " + bearerToken)
                 .content(jsonBody)//corpo da requisição
                 .contentType(MediaType.APPLICATION_JSON)//"negociando" o tipo do corpo da requisição
                 .accept(MediaType.APPLICATION_JSON));
@@ -86,6 +98,7 @@ class ProductControllerIT {
 
         //EScrevemos a chamada HTTP
         ResultActions result = mockMvc.perform(put("/products/{id}", notExistingId)
+                .header("Authorization", "Bearer " + bearerToken)
                 .content(jsonBody)//corpo da requisição
                 .contentType(MediaType.APPLICATION_JSON)//"negociando" o tipo do corpo da requisição
                 .accept(MediaType.APPLICATION_JSON));
