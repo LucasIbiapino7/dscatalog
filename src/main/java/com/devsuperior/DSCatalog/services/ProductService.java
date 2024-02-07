@@ -4,6 +4,7 @@ import com.devsuperior.DSCatalog.dto.CategoryDTO;
 import com.devsuperior.DSCatalog.dto.ProductDTO;
 import com.devsuperior.DSCatalog.entities.Category;
 import com.devsuperior.DSCatalog.entities.Product;
+import com.devsuperior.DSCatalog.projections.ProductProjection;
 import com.devsuperior.DSCatalog.repositories.CategoryRepository;
 import com.devsuperior.DSCatalog.repositories.ProductRepository;
 import com.devsuperior.DSCatalog.services.exception.DatabaseException;
@@ -12,10 +13,14 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -27,8 +32,24 @@ public class ProductService {
     private CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
-    public Page<ProductDTO> findAll(Pageable pageable){
-        return repository.findAll(pageable).map(x -> new ProductDTO(x));
+    public Page<ProductDTO> findAll(String name, String categoryId, Pageable pageable){
+
+        List<Long> categoryIds = Arrays.asList();
+
+        if (!categoryId.isEmpty()){
+            String[] vet = categoryId.split(",");
+            List<String> result = Arrays.asList(vet);
+            categoryIds = result.stream().map(Long::parseLong).toList();
+            //categoryIds = Arrays.asList(categoryId.split(",")).stream().map(Long::parseLong).toList();
+        }
+
+        Page<ProductProjection> page = repository.searchProducts(categoryIds, name, pageable);
+
+        List<Product> entities = repository.searchProductsWithCategories(page.map(x -> x.getId()).toList());
+        List<ProductDTO> productDTOS = entities.stream().map(x -> new ProductDTO(x, x.getCategories())).toList();
+
+        PageImpl<ProductDTO> result = new PageImpl<>(productDTOS, page.getPageable(), page.getTotalElements());
+        return result;
     }
 
     @Transactional(readOnly = true)

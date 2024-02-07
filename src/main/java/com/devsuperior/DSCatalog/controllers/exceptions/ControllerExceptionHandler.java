@@ -37,18 +37,6 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<CustomErrorDTO> MethodArgumentNotValid(MethodArgumentNotValidException e, HttpServletRequest request){
-        ValidationErrorDTO err = new ValidationErrorDTO();
-        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;//422
-        err.setTimestamp(Instant.now());
-        err.setStatus(status.value());
-        err.setError("Campos inválidos");
-        err.setPath(request.getRequestURI());
-        for (FieldError f : e.getBindingResult().getFieldErrors()){
-            err.addError(f.getField(), f.getDefaultMessage());
-        }
-        return ResponseEntity.status(status).body(err);
-    }
+
 
 }
