@@ -1,6 +1,7 @@
 package com.devsuperior.DSCatalog.controllers.exceptions;
 
 import com.devsuperior.DSCatalog.services.exception.DatabaseException;
+import com.devsuperior.DSCatalog.services.exception.EmailException;
 import com.devsuperior.DSCatalog.services.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -48,4 +49,14 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<CustomErrorDTO> Email(EmailException e, HttpServletRequest request){
+        CustomErrorDTO err = new CustomErrorDTO();
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError(e.getMessage());
+        err.setPath(request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
 }
